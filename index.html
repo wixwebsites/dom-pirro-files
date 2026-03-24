@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DOM PIRRO FILES</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=JetBrains+Mono:wght@400;700;800&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0c;
+  --fg: #e8e4df;
+  --accent: #ff3c28;
+  --accent2: #ff6b1a;
+  --muted: #3a3a40;
+  --card-bg: #131318;
+  --card-border: #222228;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Space Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── NOISE OVERLAY ─── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ─── SCANLINES ─── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* ─── COUNTDOWN SCREEN ─── */
+#countdown-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent));
+  background-size: 200% 100%;
+  animation: barSlide 3s linear infinite;
+  z-index: 100;
+}
+
+@keyframes barSlide {
+  0% { background-position: 0% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.label-top {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(1.4rem, 3vw, 2.4rem);
+  letter-spacing: 0.5em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  opacity: 0.9;
+  text-align: center;
+}
+
+.title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3rem, 10vw, 9rem);
+  letter-spacing: 0.15em;
+  line-height: 0.95;
+  text-align: center;
+  background: linear-gradient(180deg, var(--fg) 40%, rgba(232,228,223,0.5) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.title::after {
+  content: 'DOM PIRRO FILES';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0;
+  animation: titleGlitch 5s infinite;
+}
+
+@keyframes titleGlitch {
+  0%, 95%, 100% { opacity: 0; transform: none; }
+  96% { opacity: 1; transform: translate(-3px, 2px); }
+  97% { opacity: 0; }
+  98% { opacity: 1; transform: translate(3px, -1px); }
+  99% { opacity: 0; }
+}
+
+.countdown {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: clamp(4rem, 14vw, 13rem);
+  letter-spacing: 0.05em;
+  text-align: center;
+  color: var(--fg);
+  position: relative;
+  line-height: 1;
+  text-shadow: 0 0 60px rgba(255, 60, 40, 0.15);
+}
+
+.countdown .sep {
+  color: var(--accent);
+  animation: blink 1s step-end infinite;
+  display: inline-block;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+.countdown-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(0.7rem, 1.5vw, 1rem);
+  color: var(--muted);
+  letter-spacing: 0.6em;
+  margin-top: 1.5rem;
+  text-transform: uppercase;
+}
+
+/* ─── END COUNTDOWN BUTTON ─── */
+.end-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--muted);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.end-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 20px rgba(255, 60, 40, 0.2);
+}
+
+/* ─── RELEASE ANIMATION ─── */
+#release-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: none;
+  pointer-events: none;
+}
+
+#release-overlay.active {
+  display: block;
+  animation: flashBang 1.5s forwards;
+}
+
+@keyframes flashBang {
+  0% { background: white; opacity: 1; }
+  15% { background: var(--accent); opacity: 0.9; }
+  30% { background: white; opacity: 0.7; }
+  50% { background: var(--accent2); opacity: 0.4; }
+  100% { opacity: 0; }
+}
+
+.glitch-slice {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 20vh;
+  background: var(--accent);
+  z-index: 9999;
+  opacity: 0;
+}
+
+/* ─── FILES SCREEN ─── */
+#files-screen {
+  display: none;
+  min-height: 100vh;
+  padding: 2rem;
+  padding-top: 6rem;
+}
+
+#files-screen.active {
+  display: block;
+}
+
+.files-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.files-header .title {
+  font-size: clamp(2.5rem, 7vw, 6rem);
+  margin-bottom: 0.5rem;
+}
+
+.files-header .subtitle {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.4em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.files-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-bottom: 4rem;
+}
+
+.file-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+.file-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.file-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(255, 60, 40, 0.12);
+}
+
+.file-card img {
+  width: 100%;
+  aspect-ratio: 16/10;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(0.1);
+  transition: filter 0.4s;
+}
+
+.file-card:hover img {
+  filter: grayscale(0);
+}
+
+.file-card .meta {
+  padding: 1rem 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  border-top: 1px solid var(--card-border);
+}
+
+.file-card .meta .icon {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--accent);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.file-card .meta .fname {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--fg);
+  opacity: 0.8;
+  letter-spacing: 0.03em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-card .meta .tag {
+  margin-left: auto;
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  background: rgba(255, 60, 40, 0.1);
+  padding: 3px 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ─── LIGHTBOX / POPUP ─── */
+#lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  background: rgba(5, 5, 8, 0.95);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  backdrop-filter: blur(20px);
+  cursor: pointer;
+}
+
+#lightbox.active {
+  display: flex;
+  animation: lbIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes lbIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+#lightbox img {
+  max-width: 90vw;
+  max-height: 80vh;
+  object-fit: contain;
+  border: 1px solid var(--card-border);
+  animation: lbImgIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes lbImgIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+#lightbox .lb-filename {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 1.2rem;
+  letter-spacing: 0.1em;
+}
+
+#lightbox .lb-close {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+#lightbox .lb-close:hover {
+  color: var(--accent);
+}
+
+/* ─── REDACTED STAMP ─── */
+.stamp {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-12deg) scale(3);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 6rem;
+  color: var(--accent);
+  letter-spacing: 0.2em;
+  border: 6px solid var(--accent);
+  padding: 0.2em 0.6em;
+  opacity: 0;
+  z-index: 10001;
+  pointer-events: none;
+  text-shadow: 0 0 30px rgba(255, 60, 40, 0.5);
+}
+
+.stamp.show {
+  animation: stampIn 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes stampIn {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(-12deg) scale(3); }
+  20% { opacity: 1; transform: translate(-50%, -50%) rotate(-12deg) scale(1); }
+  30% { opacity: 1; transform: translate(-50%, -50%) rotate(-10deg) scale(1.05); }
+  40% { opacity: 1; transform: translate(-50%, -50%) rotate(-12deg) scale(1); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(-12deg) scale(0.95); }
+}
+
+/* ─── PARTICLES ─── */
+.particle {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  background: var(--accent);
+  pointer-events: none;
+  z-index: 10002;
+  border-radius: 0;
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 600px) {
+  .countdown { font-size: 3.5rem; }
+  .files-grid { grid-template-columns: 1fr; }
+  .end-btn { font-size: 0.55rem; padding: 6px 10px; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar"></div>
+
+<!-- END COUNTDOWN (testing) -->
+<button class="end-btn" id="endBtn" onclick="triggerRelease()">End Countdown</button>
+
+<!-- COUNTDOWN SCREEN -->
+<div id="countdown-screen">
+  <div class="label-top">Classified · Restricted Access</div>
+  <div class="title">DOM PIRRO FILES</div>
+  <div class="countdown" id="countdown">00<span class="sep">:</span>00<span class="sep">:</span>00</div>
+  <div class="countdown-sub">Hours &nbsp;&nbsp;&nbsp; Minutes &nbsp;&nbsp;&nbsp; Seconds</div>
+</div>
+
+<!-- RELEASE OVERLAY -->
+<div id="release-overlay"></div>
+<div class="stamp" id="stamp">RELEASED</div>
+
+<!-- FILES SCREEN -->
+<div id="files-screen">
+  <div class="files-header">
+    <div class="title">DOM PIRRO FILES</div>
+    <div class="subtitle">Declassified — All faces redacted</div>
+  </div>
+  <div class="files-grid" id="filesGrid"></div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="closeLightbox()">
+  <span class="lb-close">[ESC] Close</span>
+  <img id="lbImg" src="" alt="">
+  <div class="lb-filename" id="lbFilename"></div>
+</div>
+
+<script>
+// ─── IMAGE DATA (embedded) ───
+// Will be replaced with actual image data
+let IMAGE_DATA = [];
+</script>
+
+<!-- Load image data -->
+<script>
+// Inline the image data during build
+</script>
+
+<script>
+// ─── COUNTDOWN LOGIC ───
+const TARGET = new Date('2026-03-25T10:25:00').getTime();
+let released = false;
+
+function updateCountdown() {
+  if (released) return;
+  
+  const now = Date.now();
+  const diff = TARGET - now;
+  
+  if (diff <= 0) {
+    triggerRelease();
+    return;
+  }
+  
+  const hrs = Math.floor(diff / (1000 * 60 * 60));
+  const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const secs = Math.floor((diff % (1000 * 60)) / 1000);
+  
+  const pad = n => String(n).padStart(2, '0');
+  
+  document.getElementById('countdown').innerHTML = 
+    `${pad(hrs)}<span class="sep">:</span>${pad(mins)}<span class="sep">:</span>${pad(secs)}`;
+  
+  requestAnimationFrame(() => setTimeout(updateCountdown, 100));
+}
+
+updateCountdown();
+
+// ─── RELEASE TRIGGER ───
+function triggerRelease() {
+  if (released) return;
+  released = true;
+  
+  // Flash
+  const overlay = document.getElementById('release-overlay');
+  overlay.classList.add('active');
+  
+  // Spawn particles
+  spawnParticles(60);
+  
+  // Stamp
+  setTimeout(() => {
+    document.getElementById('stamp').classList.add('show');
+  }, 400);
+  
+  // Glitch slices
+  for (let i = 0; i < 5; i++) {
+    const slice = document.createElement('div');
+    slice.className = 'glitch-slice';
+    slice.style.top = (Math.random() * 100) + 'vh';
+    slice.style.height = (5 + Math.random() * 15) + 'vh';
+    slice.style.animationDelay = (i * 0.1) + 's';
+    document.body.appendChild(slice);
+    
+    slice.animate([
+      { opacity: 0, transform: 'translateX(-100%)' },
+      { opacity: 0.8, transform: 'translateX(0)' },
+      { opacity: 0.8, transform: 'translateX(0)' },
+      { opacity: 0, transform: 'translateX(100%)' }
+    ], {
+      duration: 600,
+      delay: i * 80,
+      easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+    }).onfinish = () => slice.remove();
+  }
+  
+  // Transition to files
+  setTimeout(() => {
+    document.getElementById('countdown-screen').style.display = 'none';
+    document.getElementById('endBtn').style.display = 'none';
+    overlay.classList.remove('active');
+    overlay.style.display = 'none';
+    
+    const filesScreen = document.getElementById('files-screen');
+    filesScreen.classList.add('active');
+    
+    renderFiles();
+  }, 2200);
+}
+
+// ─── PARTICLES ───
+function spawnParticles(count) {
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    p.style.left = cx + 'px';
+    p.style.top = cy + 'px';
+    p.style.width = (2 + Math.random() * 6) + 'px';
+    p.style.height = (2 + Math.random() * 6) + 'px';
+    
+    if (Math.random() > 0.5) p.style.background = '#ff6b1a';
+    
+    document.body.appendChild(p);
+    
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 200 + Math.random() * 600;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist;
+    
+    p.animate([
+      { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+      { transform: `translate(${dx}px, ${dy}px) scale(0)`, opacity: 0 }
+    ], {
+      duration: 800 + Math.random() * 800,
+      easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+      delay: Math.random() * 300
+    }).onfinish = () => p.remove();
+  }
+}
+
+// ─── RENDER FILES ───
+function renderFiles() {
+  const grid = document.getElementById('filesGrid');
+  grid.innerHTML = '';
+  
+  IMAGE_DATA.forEach((img, idx) => {
+    const card = document.createElement('div');
+    card.className = 'file-card';
+    
+    const src = `data:${img.mime};base64,${img.data}`;
+    
+    card.innerHTML = `
+      <img src="${src}" alt="${img.filename}" loading="lazy">
+      <div class="meta">
+        <div class="icon"></div>
+        <span class="fname">${img.filename}</span>
+        <span class="tag">Redacted</span>
+      </div>
+    `;
+    
+    card.addEventListener('click', () => openLightbox(src, img.filename));
+    grid.appendChild(card);
+    
+    // Stagger reveal
+    setTimeout(() => card.classList.add('visible'), 100 + idx * 120);
+  });
+}
+
+// ─── LIGHTBOX ───
+function openLightbox(src, filename) {
+  const lb = document.getElementById('lightbox');
+  document.getElementById('lbImg').src = src;
+  document.getElementById('lbFilename').textContent = filename;
+  lb.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLightbox();
+});
+</script>
+
+</body>
+</html>
