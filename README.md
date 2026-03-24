@@ -16,3 +16,4 @@ Countdown site that reveals redacted photos at **March 25, 2026 10:25 AM**.
 - Click-to-popup lightbox
 - Face redaction via OpenCV Haar cascades
 - "End Countdown" button for testing (top-right)
+# Trigger redeploy Tue Mar 24 15:58:20 UTC 2026
