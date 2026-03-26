@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Face redaction script for DOM PIRRO FILES.
+Face redaction script for NATHAN MATTHIS FILES.
 Reads images from input folder, detects faces using OpenCV Haar cascades,
 draws black rectangles over detected faces, saves to output folder.
 """
